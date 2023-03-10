@@ -46,15 +46,41 @@ const registrarUser = asyncHandler(async (req, res) => {
 })
 
 const loginUser = asyncHandler(async (req, res) => {
+    const {email, password} = req.body
+
+    const user = await User.findOne({email})
+    if(user && (await bcrypt.compare(password, user.password))) {
+        res.json({
+            _id: user.id,
+            name: user.name, 
+            email: user.email,
+            token: generateToken(user._id)
+        })
+    } else {
+        res.status(400)
+        throw new Error('Credenciales incorrectas')
+    }
     res.json({ message: 'Login Usuario' })
 })
 
-const deleteUser = asyncHandler(async (req, res) => {
-    res.json({ message: 'Data Usuario' })
+const generateToken = (id) => {
+    return jwt.sign({id}, process.env.JWT_SECRET, {
+        expiresIn: '30d'
+    })
+}
+
+const dataUser = asyncHandler(async (req, res) => {
+    const{_id, name, email} = req.user
+
+    res.status(200).json({
+        id: _id,
+        name,
+        email
+    })
 })
 
 module.exports = {
     registrarUser,
     loginUser,
-    deleteUser
+    dataUser
 }
