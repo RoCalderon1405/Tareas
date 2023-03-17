@@ -10,20 +10,20 @@ const registrarUser = asyncHandler(async (req, res) => {
 
     const { name, email, password } = req.body
 
-    if(!name || !email || !password) {
+    if (!name || !email || !password) {
         res.status(400)
-        throw new Error ('Faltan datos, favor de  verificar')
+        throw new Error('Faltan datos, favor de  verificar')
     }
 
-    const userExiste = await User.findOne({email})
+    const userExiste = await User.findOne({ email })
 
-    if(userExiste){
+    if (userExiste) {
         res.status(400)
         throw new Error('Ese usuario ya existe')
     }
 
     //Hash password
-    const salt  = await bcrypt.genSalt(10)
+    const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
 
     const user = await User.create({
@@ -32,7 +32,7 @@ const registrarUser = asyncHandler(async (req, res) => {
         password: hashedPassword
     })
 
-    if(user) {
+    if (user) {
         res.status(201).json({
             _id: user.id,
             name: user.name,
@@ -46,13 +46,13 @@ const registrarUser = asyncHandler(async (req, res) => {
 })
 
 const loginUser = asyncHandler(async (req, res) => {
-    const {email, password} = req.body
+    const { email, password } = req.body
 
-    const user = await User.findOne({email})
-    if(user && (await bcrypt.compare(password, user.password))) {
+    const user = await User.findOne({ email })
+    if (user && (await bcrypt.compare(password, user.password))) {
         res.json({
             _id: user.id,
-            name: user.name, 
+            name: user.name,
             email: user.email,
             token: generateToken(user._id)
         })
@@ -64,13 +64,13 @@ const loginUser = asyncHandler(async (req, res) => {
 })
 
 const generateToken = (id) => {
-    return jwt.sign({id}, process.env.JWT_SECRET, {
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: '30d'
     })
 }
 
 const dataUser = asyncHandler(async (req, res) => {
-    const{_id, name, email} = req.user
+    const { _id, name, email } = req.user
 
     res.status(200).json({
         id: _id,
